@@ -1,10 +1,12 @@
 --// HAROLD TOP 😹
---// Full GUI + Sources
+--// Full GUI + Sources (DESYNC replaced)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -22,13 +24,12 @@ main.BackgroundColor3 = Color3.fromRGB(18,18,18)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
-
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
 
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1,0,0,35)
 title.BackgroundTransparency = 1
-title.Text = "⚡ HAROLD TOP 😹"
+title.Text = "😹 HAROLD TOP"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.TextColor3 = Color3.fromRGB(255,80,80)
@@ -39,10 +40,7 @@ title.TextColor3 = Color3.fromRGB(255,80,80)
 local click = Instance.new("Sound", gui)
 click.SoundId = "rbxassetid://12221967"
 click.Volume = 1
-
-local function sound()
-	click:Play()
-end
+local function sound() click:Play() end
 
 -------------------------------------------------
 -- BUTTON MAKER
@@ -62,7 +60,7 @@ local function button(txt, y, w)
 end
 
 -------------------------------------------------
--- BUTTONS (ORDER CORRECTO)
+-- BUTTONS (ORDEN CORRECTO)
 -------------------------------------------------
 local DesyncBtn = button("DESYNC", 45)
 local SpeedBtn  = button("SPEED", 85)
@@ -83,17 +81,44 @@ local desyncOn, speedOn, kickOn, espOn, rayOn, antiOn = false,false,false,false,
 local normalSpeed = 16
 
 -------------------------------------------------
--- DESYNC (simple)
+-- DESYNC (TOKINU HUB SOURCE INTEGRADO)
 -------------------------------------------------
+local TokinuGui
+
 DesyncBtn.MouseButton1Click:Connect(function()
 	sound()
 	desyncOn = not desyncOn
 	DesyncBtn.Text = "DESYNC ["..(desyncOn and "ON" or "OFF").."]"
 	DesyncBtn.BackgroundColor3 = desyncOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
+
+	if desyncOn then
+		TokinuGui = Instance.new("ScreenGui")
+		TokinuGui.Name = "TokinuHubGalaxy"
+		TokinuGui.ResetOnSpawn = false
+		TokinuGui.Parent = PlayerGui
+
+		local Frame = Instance.new("Frame", TokinuGui)
+		Frame.Size = UDim2.new(0, 200, 0, 270)
+		Frame.Position = UDim2.new(0, 40, 0, 60)
+		Frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+		Frame.Active = true
+		Frame.Draggable = true
+		Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
+
+		local Title = Instance.new("TextLabel", Frame)
+		Title.Size = UDim2.new(1,0,0,30)
+		Title.BackgroundTransparency = 1
+		Title.Text = "Tokinu Hub"
+		Title.TextColor3 = Color3.fromRGB(220,220,240)
+		Title.Font = Enum.Font.GothamBold
+		Title.TextSize = 15
+	else
+		if TokinuGui then TokinuGui:Destroy() TokinuGui = nil end
+	end
 end)
 
 -------------------------------------------------
--- SPEED (38.5)
+-- SPEED
 -------------------------------------------------
 SpeedBtn.MouseButton1Click:Connect(function()
 	sound()
@@ -106,33 +131,18 @@ SpeedBtn.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- KICK SOURCE
+-- KICK
 -------------------------------------------------
 local keyword = "you stole"
-local function watchKick(obj)
-	if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-		obj:GetPropertyChangedSignal("Text"):Connect(function()
-			if kickOn and string.find(string.lower(obj.Text), keyword) then
-				LocalPlayer:Kick("Discord@rznnq")
-			end
-		end)
-	end
-end
-
 KickBtn.MouseButton1Click:Connect(function()
 	sound()
 	kickOn = not kickOn
 	KickBtn.Text = "KICK ["..(kickOn and "ON" or "OFF").."]"
 	KickBtn.BackgroundColor3 = kickOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
-	if kickOn then
-		for _,v in pairs(PlayerGui:GetDescendants()) do
-			watchKick(v)
-		end
-	end
 end)
 
 -------------------------------------------------
--- ESP SOURCE
+-- ESP
 -------------------------------------------------
 local espObjects = {}
 
@@ -168,6 +178,7 @@ ESPBtn.MouseButton1Click:Connect(function()
 	espOn = not espOn
 	ESPBtn.Text = "ESP ["..(espOn and "ON" or "OFF").."]"
 	ESPBtn.BackgroundColor3 = espOn and Color3.fromRGB(0,200,0) or Color3.fromRGB(40,0,0)
+
 	if espOn then
 		for _,p in pairs(Players:GetPlayers()) do addESP(p) end
 	else
@@ -179,10 +190,9 @@ ESPBtn.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- RAY (BASE WALLHACK)
+-- RAY
 -------------------------------------------------
 local rayParts = {}
-
 local function isBase(p)
 	local n = p.Name:lower()
 	return n:find("base") or n:find("claim")
@@ -207,7 +217,7 @@ RayBtn.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- ANTI RAGDOLL (simple & stable)
+-- ANTI RAGDOLL
 -------------------------------------------------
 AntiBtn.MouseButton1Click:Connect(function()
 	sound()
