@@ -1,191 +1,226 @@
--- HAROLD TOP 😹
--- Full GUI Script | Movible | Toggle | Click Sound
+--// HAROLD TOP 😹
+--// Full GUI + Sources
 
----------------- SERVICES ----------------
 local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
----------------- CLICK SOUND ----------------
-local function playClick(parent)
-	local s = Instance.new("Sound")
-	s.SoundId = "rbxassetid://12221967"
-	s.Volume = 1
-	s.Parent = parent
-	s:Play()
-	game.Debris:AddItem(s, 2)
-end
-
----------------- GUI ----------------
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "HAROLD_TOP_GUI"
+-------------------------------------------------
+-- GUI BASE
+-------------------------------------------------
+local gui = Instance.new("ScreenGui", PlayerGui)
+gui.Name = "HAROLD_TOP"
 gui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.fromScale(0.28, 0.45)
-main.Position = UDim2.fromScale(0.36, 0.25)
-main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.Size = UDim2.new(0, 210, 0, 260)
+main.Position = UDim2.new(0.5, -105, 0.5, -130)
+main.BackgroundColor3 = Color3.fromRGB(18,18,18)
+main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
-main.BorderSizePixel = 0
 
-local corner = Instance.new("UICorner", main)
-corner.CornerRadius = UDim.new(0,16)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
 
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1,0,0.15,0)
+title.Size = UDim2.new(1,0,0,35)
 title.BackgroundTransparency = 1
-title.Text = "HAROLD TOP 😹"
-title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Text = "⚡ HAROLD TOP 😹"
 title.Font = Enum.Font.GothamBold
-title.TextScaled = true
+title.TextSize = 14
+title.TextColor3 = Color3.fromRGB(255,80,80)
 
-local layout = Instance.new("UIListLayout", main)
-layout.Padding = UDim.new(0,8)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.VerticalAlignment = Enum.VerticalAlignment.Top
-layout.Padding = UDim.new(0,10)
+-------------------------------------------------
+-- CLICK SOUND
+-------------------------------------------------
+local click = Instance.new("Sound", gui)
+click.SoundId = "rbxassetid://12221967"
+click.Volume = 1
 
----------------- BUTTON CREATOR ----------------
-local function makeButton(text, sizeX)
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(sizeX or 0.9,0,0.1,0)
-	b.Text = text
-	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+local function sound()
+	click:Play()
+end
+
+-------------------------------------------------
+-- BUTTON MAKER
+-------------------------------------------------
+local function button(txt, y, w)
+	local b = Instance.new("TextButton", main)
+	b.Size = w or UDim2.new(1,-20,0,32)
+	b.Position = UDim2.new(0,10,0,y)
+	b.BackgroundColor3 = Color3.fromRGB(40,0,0)
+	b.Text = txt.." [OFF]"
 	b.TextColor3 = Color3.new(1,1,1)
 	b.Font = Enum.Font.GothamBold
-	b.TextScaled = true
+	b.TextSize = 12
 	b.BorderSizePixel = 0
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,12)
-	b.Parent = main
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
 	return b
 end
 
----------------- BUTTONS (ORDER) ----------------
-local desyncBtn = makeButton("DESYNC")
-local speedBtn = makeButton("SPEED")
-local kickBtn = makeButton("KICK")
+-------------------------------------------------
+-- BUTTONS (ORDER CORRECTO)
+-------------------------------------------------
+local DesyncBtn = button("DESYNC", 45)
+local SpeedBtn  = button("SPEED", 85)
+local KickBtn   = button("KICK", 125)
 
--- ESP + RAY ROW
-local row = Instance.new("Frame", main)
-row.Size = UDim2.new(0.9,0,0.1,0)
-row.BackgroundTransparency = 1
+local ESPBtn = button("ESP", 165, UDim2.new(0.48,-5,0,32))
+ESPBtn.Position = UDim2.new(0,10,0,165)
 
-local espBtn = Instance.new("TextButton", row)
-espBtn.Size = UDim2.new(0.48,0,1,0)
-espBtn.Position = UDim2.new(0,0,0,0)
-espBtn.Text = "ESP"
-espBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-espBtn.TextColor3 = Color3.new(1,1,1)
-espBtn.Font = Enum.Font.GothamBold
-espBtn.TextScaled = true
-Instance.new("UICorner", espBtn).CornerRadius = UDim.new(0,12)
+local RayBtn = button("RAY", 165, UDim2.new(0.48,-5,0,32))
+RayBtn.Position = UDim2.new(0.52,0,0,165)
 
-local rayBtn = Instance.new("TextButton", row)
-rayBtn.Size = UDim2.new(0.48,0,1,0)
-rayBtn.Position = UDim2.new(0.52,0,0,0)
-rayBtn.Text = "RAY"
-rayBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-rayBtn.TextColor3 = Color3.new(1,1,1)
-rayBtn.Font = Enum.Font.GothamBold
-rayBtn.TextScaled = true
-Instance.new("UICorner", rayBtn).CornerRadius = UDim.new(0,12)
+local AntiBtn = button("ANTIRADGOLL", 205)
 
-local antiBtn = makeButton("ANTI RAGDOLL")
+-------------------------------------------------
+-- STATES
+-------------------------------------------------
+local desyncOn, speedOn, kickOn, espOn, rayOn, antiOn = false,false,false,false,false,false
+local normalSpeed = 16
 
-------------------------------------------------
----------------- FEATURES -----------------------
-------------------------------------------------
-
+-------------------------------------------------
 -- DESYNC (simple)
-local desync = false
-desyncBtn.MouseButton1Click:Connect(function()
-	playClick(desyncBtn)
-	desync = not desync
-	RunService:Set3dRenderingEnabled(not desync)
+-------------------------------------------------
+DesyncBtn.MouseButton1Click:Connect(function()
+	sound()
+	desyncOn = not desyncOn
+	DesyncBtn.Text = "DESYNC ["..(desyncOn and "ON" or "OFF").."]"
+	DesyncBtn.BackgroundColor3 = desyncOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
 end)
 
--- SPEED
-local speed = false
-speedBtn.MouseButton1Click:Connect(function()
-	playClick(speedBtn)
-	local char = player.Character or player.CharacterAdded:Wait()
-	local hum = char:WaitForChild("Humanoid")
-	speed = not speed
-	hum.WalkSpeed = speed and 38.5 or 16
+-------------------------------------------------
+-- SPEED (38.5)
+-------------------------------------------------
+SpeedBtn.MouseButton1Click:Connect(function()
+	sound()
+	local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+	if not hum then return end
+	speedOn = not speedOn
+	hum.WalkSpeed = speedOn and 38.5 or normalSpeed
+	SpeedBtn.Text = "SPEED ["..(speedOn and "ON" or "OFF").."]"
+	SpeedBtn.BackgroundColor3 = speedOn and Color3.fromRGB(0,120,255) or Color3.fromRGB(40,0,0)
 end)
 
--- KICK (YOUR SOURCE)
-local kickEnabled = false
-kickBtn.MouseButton1Click:Connect(function()
-	playClick(kickBtn)
-	if kickEnabled then return end
-	kickEnabled = true
-
-	local PlayerGui = player:WaitForChild("PlayerGui")
-	local KEYWORD = "you stole"
-	local KICK_MESSAGE = "Discord@rznnq"
-
-	local function check(obj)
-		if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-			if string.find(string.lower(obj.Text), KEYWORD) then
-				player:Kick(KICK_MESSAGE)
+-------------------------------------------------
+-- KICK SOURCE
+-------------------------------------------------
+local keyword = "you stole"
+local function watchKick(obj)
+	if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+		obj:GetPropertyChangedSignal("Text"):Connect(function()
+			if kickOn and string.find(string.lower(obj.Text), keyword) then
+				LocalPlayer:Kick("Discord@rznnq")
 			end
+		end)
+	end
+end
+
+KickBtn.MouseButton1Click:Connect(function()
+	sound()
+	kickOn = not kickOn
+	KickBtn.Text = "KICK ["..(kickOn and "ON" or "OFF").."]"
+	KickBtn.BackgroundColor3 = kickOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
+	if kickOn then
+		for _,v in pairs(PlayerGui:GetDescendants()) do
+			watchKick(v)
 		end
 	end
-
-	for _,g in pairs(PlayerGui:GetDescendants()) do
-		check(g)
-	end
-
-	PlayerGui.DescendantAdded:Connect(check)
 end)
 
--- ESP (simple box)
-local espOn = false
-espBtn.MouseButton1Click:Connect(function()
-	playClick(espBtn)
+-------------------------------------------------
+-- ESP SOURCE
+-------------------------------------------------
+local espObjects = {}
+
+local function addESP(plr)
+	if plr == LocalPlayer then return end
+	local c = plr.Character
+	if not c then return end
+	local hrp = c:FindFirstChild("HumanoidRootPart")
+	local head = c:FindFirstChild("Head")
+	if not (hrp and head) then return end
+
+	local box = Instance.new("BoxHandleAdornment", hrp)
+	box.Size = Vector3.new(4,6,2)
+	box.AlwaysOnTop = true
+	box.Transparency = 0.6
+	box.Color3 = Color3.fromRGB(255,0,255)
+
+	local bb = Instance.new("BillboardGui", head)
+	bb.Size = UDim2.new(0,200,0,40)
+	bb.AlwaysOnTop = true
+	local tl = Instance.new("TextLabel", bb)
+	tl.Size = UDim2.new(1,0,1,0)
+	tl.BackgroundTransparency = 1
+	tl.Text = plr.Name
+	tl.TextColor3 = Color3.fromRGB(255,0,255)
+	tl.TextScaled = true
+
+	espObjects[plr] = {box,bb}
+end
+
+ESPBtn.MouseButton1Click:Connect(function()
+	sound()
 	espOn = not espOn
-	for _,p in pairs(Players:GetPlayers()) do
-		if p ~= player and p.Character then
-			for _,v in pairs(p.Character:GetChildren()) do
-				if v:IsA("BasePart") then
-					v.LocalTransparencyModifier = espOn and 0.3 or 0
-				end
+	ESPBtn.Text = "ESP ["..(espOn and "ON" or "OFF").."]"
+	ESPBtn.BackgroundColor3 = espOn and Color3.fromRGB(0,200,0) or Color3.fromRGB(40,0,0)
+	if espOn then
+		for _,p in pairs(Players:GetPlayers()) do addESP(p) end
+	else
+		for _,t in pairs(espObjects) do
+			for _,o in pairs(t) do o:Destroy() end
+		end
+		espObjects = {}
+	end
+end)
+
+-------------------------------------------------
+-- RAY (BASE WALLHACK)
+-------------------------------------------------
+local rayParts = {}
+
+local function isBase(p)
+	local n = p.Name:lower()
+	return n:find("base") or n:find("claim")
+end
+
+RayBtn.MouseButton1Click:Connect(function()
+	sound()
+	rayOn = not rayOn
+	RayBtn.Text = "RAY ["..(rayOn and "ON" or "OFF").."]"
+	RayBtn.BackgroundColor3 = rayOn and Color3.fromRGB(255,140,0) or Color3.fromRGB(40,0,0)
+
+	for _,v in pairs(Workspace:GetDescendants()) do
+		if v:IsA("BasePart") and isBase(v) then
+			if rayOn then
+				rayParts[v] = v.LocalTransparencyModifier
+				v.LocalTransparencyModifier = 0.8
+			else
+				v.LocalTransparencyModifier = rayParts[v] or 0
 			end
 		end
 	end
 end)
 
--- RAY (YOUR SOURCE)
-rayBtn.MouseButton1Click:Connect(function()
-	playClick(rayBtn)
-
-	local original = {}
-	local function isBase(o)
-		local n = o.Name:lower()
-		return n:find("base") or n:find("claim")
-	end
-
-	for _,o in pairs(Workspace:GetDescendants()) do
-		if o:IsA("BasePart") and isBase(o) then
-			original[o] = o.LocalTransparencyModifier
-			o.LocalTransparencyModifier = 0.8
-		end
-	end
+-------------------------------------------------
+-- ANTI RAGDOLL (simple & stable)
+-------------------------------------------------
+AntiBtn.MouseButton1Click:Connect(function()
+	sound()
+	antiOn = not antiOn
+	AntiBtn.Text = "ANTIRADGOLL ["..(antiOn and "ON" or "OFF").."]"
+	AntiBtn.BackgroundColor3 = antiOn and Color3.fromRGB(120,120,120) or Color3.fromRGB(40,0,0)
 end)
 
--- ANTI RAGDOLL (simplified toggle)
-local anti = false
-antiBtn.MouseButton1Click:Connect(function()
-	playClick(antiBtn)
-	anti = not anti
-	local char = player.Character or player.CharacterAdded:Wait()
-	for _,v in pairs(char:GetDescendants()) do
-		if v:IsA("BallSocketConstraint") then
-			v.Enabled = not anti
+RunService.Heartbeat:Connect(function()
+	if antiOn then
+		local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+		if hum and hum:GetState() == Enum.HumanoidStateType.Ragdoll then
+			hum:ChangeState(Enum.HumanoidStateType.Running)
 		end
 	end
 end)
