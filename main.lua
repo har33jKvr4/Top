@@ -1,236 +1,192 @@
---// HAROLD TOP 😹
---// Full GUI + Sources (DESYNC replaced)
+--[[ 
+====================================================
+ Speed Boost | Harold lua
+ Tsunami UI + LKZ Speed
+====================================================
+]]
 
+-------------------------------------------------
+-- SERVICIOS
+-------------------------------------------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local GuiService = game:GetService("GuiService")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--------------------------------------------------
--- GUI BASE
--------------------------------------------------
-local gui = Instance.new("ScreenGui", PlayerGui)
-gui.Name = "HAROLD_TOP"
-gui.ResetOnSpawn = false
-
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 210, 0, 260)
-main.Position = UDim2.new(0.5, -105, 0.5, -130)
-main.BackgroundColor3 = Color3.fromRGB(18,18,18)
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = true
-Instance.new("UICorner", main).CornerRadius = UDim.new(0,14)
-
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1,0,0,35)
-title.BackgroundTransparency = 1
-title.Text = "😹 HAROLD TOP"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextColor3 = Color3.fromRGB(255,80,80)
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
 -------------------------------------------------
--- CLICK SOUND
+-- CHARACTER
 -------------------------------------------------
-local click = Instance.new("Sound", gui)
-click.SoundId = "rbxassetid://12221967"
-click.Volume = 1
-local function sound() click:Play() end
+local character, hrp, hum
 
--------------------------------------------------
--- BUTTON MAKER
--------------------------------------------------
-local function button(txt, y, w)
-	local b = Instance.new("TextButton", main)
-	b.Size = w or UDim2.new(1,-20,0,32)
-	b.Position = UDim2.new(0,10,0,y)
-	b.BackgroundColor3 = Color3.fromRGB(40,0,0)
-	b.Text = txt.." [OFF]"
-	b.TextColor3 = Color3.new(1,1,1)
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = 12
-	b.BorderSizePixel = 0
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
-	return b
+local function setupCharacter(char)
+	character = char
+	hrp = char:WaitForChild("HumanoidRootPart")
+	hum = char:WaitForChild("Humanoid")
 end
 
--------------------------------------------------
--- BUTTONS (ORDEN CORRECTO)
--------------------------------------------------
-local DesyncBtn = button("DESYNC", 45)
-local SpeedBtn  = button("SPEED", 85)
-local KickBtn   = button("KICK", 125)
-
-local ESPBtn = button("ESP", 165, UDim2.new(0.48,-5,0,32))
-ESPBtn.Position = UDim2.new(0,10,0,165)
-
-local RayBtn = button("RAY", 165, UDim2.new(0.48,-5,0,32))
-RayBtn.Position = UDim2.new(0.52,0,0,165)
-
-local AntiBtn = button("ANTIRADGOLL", 205)
+if player.Character then setupCharacter(player.Character) end
+player.CharacterAdded:Connect(setupCharacter)
 
 -------------------------------------------------
--- STATES
+-- LOADING SCREEN
 -------------------------------------------------
-local desyncOn, speedOn, kickOn, espOn, rayOn, antiOn = false,false,false,false,false,false
-local normalSpeed = 16
+local LoadingGui = Instance.new("ScreenGui")
+LoadingGui.Name = "TsunamiLoading"
+LoadingGui.ResetOnSpawn = false
+LoadingGui.IgnoreGuiInset = true
+LoadingGui.Parent = PlayerGui
+
+local Background = Instance.new("Frame", LoadingGui)
+Background.Size = UDim2.new(1,0,1,0)
+Background.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Background.BackgroundTransparency = 1
+
+local Title = Instance.new("TextLabel", Background)
+Title.Size = UDim2.new(1,0,0,60)
+Title.Position = UDim2.new(0,0,0.4,0)
+Title.BackgroundTransparency = 1
+Title.Text = "Loading Speed Boost..."
+Title.TextColor3 = Color3.fromRGB(255,0,0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 32
+Title.TextTransparency = 1
+
+local BarBack = Instance.new("Frame", Background)
+BarBack.Size = UDim2.new(0.4,0,0,18)
+BarBack.Position = UDim2.new(0.3,0,0.52,0)
+BarBack.BackgroundColor3 = Color3.fromRGB(40,40,40)
+BarBack.BackgroundTransparency = 1
+BarBack.BorderSizePixel = 0
+Instance.new("UICorner", BarBack)
+
+local Bar = Instance.new("Frame", BarBack)
+Bar.Size = UDim2.new(0,0,1,0)
+Bar.BackgroundColor3 = Color3.fromRGB(255,0,0)
+Bar.BorderSizePixel = 0
+Instance.new("UICorner", Bar)
+
+TweenService:Create(Background,TweenInfo.new(0.6),{BackgroundTransparency=0}):Play()
+TweenService:Create(Title,TweenInfo.new(0.6),{TextTransparency=0}):Play()
+TweenService:Create(BarBack,TweenInfo.new(0.6),{BackgroundTransparency=0}):Play()
+
+task.wait(0.6)
+
+TweenService:Create(Bar,TweenInfo.new(1.2),{Size=UDim2.new(1,0,1,0)}):Play()
+task.wait(1.5)
+
+LoadingGui:Destroy()
 
 -------------------------------------------------
--- DESYNC (TOKINU HUB SOURCE INTEGRADO)
+-- UI HUB
 -------------------------------------------------
-local TokinuGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SpeedBoostHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
 
-DesyncBtn.MouseButton1Click:Connect(function()
-	sound()
-	desyncOn = not desyncOn
-	DesyncBtn.Text = "DESYNC ["..(desyncOn and "ON" or "OFF").."]"
-	DesyncBtn.BackgroundColor3 = desyncOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0,260,0,150)
+MainFrame.Position = UDim2.new(0.5,-130,0.5,-75)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+MainFrame.BackgroundTransparency = 0.3
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255,0,0)
+MainFrame.Active = true
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
 
-	if desyncOn then
-		TokinuGui = Instance.new("ScreenGui")
-		TokinuGui.Name = "TokinuHubGalaxy"
-		TokinuGui.ResetOnSpawn = false
-		TokinuGui.Parent = PlayerGui
+local CreatorLabel = Instance.new("TextLabel", MainFrame)
+CreatorLabel.Size = UDim2.new(1,0,0,25)
+CreatorLabel.Position = UDim2.new(0,0,0,5)
+CreatorLabel.BackgroundTransparency = 1
+CreatorLabel.Text = "Speed Boost | Harold lua"
+CreatorLabel.TextColor3 = Color3.fromRGB(255,0,0)
+CreatorLabel.Font = Enum.Font.GothamBold
+CreatorLabel.TextSize = 14
 
-		local Frame = Instance.new("Frame", TokinuGui)
-		Frame.Size = UDim2.new(0, 200, 0, 270)
-		Frame.Position = UDim2.new(0, 40, 0, 60)
-		Frame.BackgroundColor3 = Color3.fromRGB(30,30,40)
-		Frame.Active = true
-		Frame.Draggable = true
-		Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
+local BoostButton = Instance.new("TextButton", MainFrame)
+BoostButton.Size = UDim2.new(0.9,0,0,45)
+BoostButton.Position = UDim2.new(0.05,0,0,60)
+BoostButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+BoostButton.Text = "BOOST"
+BoostButton.TextColor3 = Color3.fromRGB(255,255,255)
+BoostButton.Font = Enum.Font.GothamBold
+BoostButton.TextSize = 18
+BoostButton.BorderSizePixel = 0
+Instance.new("UICorner", BoostButton).CornerRadius = UDim.new(0,10)
 
-		local Title = Instance.new("TextLabel", Frame)
-		Title.Size = UDim2.new(1,0,0,30)
-		Title.BackgroundTransparency = 1
-		Title.Text = "Tokinu Hub"
-		Title.TextColor3 = Color3.fromRGB(220,220,240)
-		Title.Font = Enum.Font.GothamBold
-		Title.TextSize = 15
-	else
-		if TokinuGui then TokinuGui:Destroy() TokinuGui = nil end
-	end
+-------------------------------------------------
+-- DISCORD (SIN CAMBIOS)
+-------------------------------------------------
+local DiscordLabel = Instance.new("TextLabel", MainFrame)
+DiscordLabel.Size = UDim2.new(0,55,0,15)
+DiscordLabel.Position = UDim2.new(0.05,0,0,115)
+DiscordLabel.BackgroundTransparency = 1
+DiscordLabel.Text = "discord:"
+DiscordLabel.TextColor3 = Color3.fromRGB(255,255,255)
+DiscordLabel.Font = Enum.Font.Gotham
+DiscordLabel.TextSize = 11
+DiscordLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local DiscordLink = Instance.new("TextButton", MainFrame)
+DiscordLink.Size = UDim2.new(0,170,0,15)
+DiscordLink.Position = UDim2.new(0.27,0,0,115)
+DiscordLink.BackgroundTransparency = 1
+DiscordLink.Text = "https://discord.gg/WvmRU6RYn"
+DiscordLink.TextColor3 = Color3.fromRGB(120,170,255)
+DiscordLink.Font = Enum.Font.Gotham
+DiscordLink.TextSize = 11
+DiscordLink.TextXAlignment = Enum.TextXAlignment.Left
+DiscordLink.AutoButtonColor = false
+
+DiscordLink.MouseButton1Click:Connect(function()
+	pcall(function()
+		GuiService:OpenBrowserWindow("https://discord.gg/WvmRU6RYn")
+	end)
 end)
 
 -------------------------------------------------
--- SPEED
+-- SPEED BOOST
 -------------------------------------------------
-SpeedBtn.MouseButton1Click:Connect(function()
-	sound()
-	local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
-	if not hum then return end
-	speedOn = not speedOn
-	hum.WalkSpeed = speedOn and 38.5 or normalSpeed
-	SpeedBtn.Text = "SPEED ["..(speedOn and "ON" or "OFF").."]"
-	SpeedBtn.BackgroundColor3 = speedOn and Color3.fromRGB(0,120,255) or Color3.fromRGB(40,0,0)
-end)
+local boostEnabled = false
+local speedConnection
 
--------------------------------------------------
--- KICK
--------------------------------------------------
-local keyword = "you stole"
-KickBtn.MouseButton1Click:Connect(function()
-	sound()
-	kickOn = not kickOn
-	KickBtn.Text = "KICK ["..(kickOn and "ON" or "OFF").."]"
-	KickBtn.BackgroundColor3 = kickOn and Color3.fromRGB(120,0,0) or Color3.fromRGB(40,0,0)
-end)
+local speedNoSteal = 16
+local speedSteal = 50
 
--------------------------------------------------
--- ESP
--------------------------------------------------
-local espObjects = {}
+BoostButton.MouseButton1Click:Connect(function()
+	boostEnabled = not boostEnabled
 
-local function addESP(plr)
-	if plr == LocalPlayer then return end
-	local c = plr.Character
-	if not c then return end
-	local hrp = c:FindFirstChild("HumanoidRootPart")
-	local head = c:FindFirstChild("Head")
-	if not (hrp and head) then return end
+	if boostEnabled then
+		BoostButton.Text = "ON"
+		BoostButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
 
-	local box = Instance.new("BoxHandleAdornment", hrp)
-	box.Size = Vector3.new(4,6,2)
-	box.AlwaysOnTop = true
-	box.Transparency = 0.6
-	box.Color3 = Color3.fromRGB(255,0,255)
+		speedConnection = RunService.Heartbeat:Connect(function()
+			if character and hrp and hum then
+				local dir = hum.MoveDirection
+				if dir.Magnitude > 0 then
+					local steal = hum.WalkSpeed < 25
+					local spd = steal and speedSteal or speedNoSteal
 
-	local bb = Instance.new("BillboardGui", head)
-	bb.Size = UDim2.new(0,200,0,40)
-	bb.AlwaysOnTop = true
-	local tl = Instance.new("TextLabel", bb)
-	tl.Size = UDim2.new(1,0,1,0)
-	tl.BackgroundTransparency = 1
-	tl.Text = plr.Name
-	tl.TextColor3 = Color3.fromRGB(255,0,255)
-	tl.TextScaled = true
-
-	espObjects[plr] = {box,bb}
-end
-
-ESPBtn.MouseButton1Click:Connect(function()
-	sound()
-	espOn = not espOn
-	ESPBtn.Text = "ESP ["..(espOn and "ON" or "OFF").."]"
-	ESPBtn.BackgroundColor3 = espOn and Color3.fromRGB(0,200,0) or Color3.fromRGB(40,0,0)
-
-	if espOn then
-		for _,p in pairs(Players:GetPlayers()) do addESP(p) end
-	else
-		for _,t in pairs(espObjects) do
-			for _,o in pairs(t) do o:Destroy() end
-		end
-		espObjects = {}
-	end
-end)
-
--------------------------------------------------
--- RAY
--------------------------------------------------
-local rayParts = {}
-local function isBase(p)
-	local n = p.Name:lower()
-	return n:find("base") or n:find("claim")
-end
-
-RayBtn.MouseButton1Click:Connect(function()
-	sound()
-	rayOn = not rayOn
-	RayBtn.Text = "RAY ["..(rayOn and "ON" or "OFF").."]"
-	RayBtn.BackgroundColor3 = rayOn and Color3.fromRGB(255,140,0) or Color3.fromRGB(40,0,0)
-
-	for _,v in pairs(Workspace:GetDescendants()) do
-		if v:IsA("BasePart") and isBase(v) then
-			if rayOn then
-				rayParts[v] = v.LocalTransparencyModifier
-				v.LocalTransparencyModifier = 0.8
-			else
-				v.LocalTransparencyModifier = rayParts[v] or 0
+					hrp.AssemblyLinearVelocity = Vector3.new(
+						dir.X * spd,
+						hrp.AssemblyLinearVelocity.Y,
+						dir.Z * spd
+					)
+				end
 			end
-		end
-	end
-end)
+		end)
 
--------------------------------------------------
--- ANTI RAGDOLL
--------------------------------------------------
-AntiBtn.MouseButton1Click:Connect(function()
-	sound()
-	antiOn = not antiOn
-	AntiBtn.Text = "ANTIRADGOLL ["..(antiOn and "ON" or "OFF").."]"
-	AntiBtn.BackgroundColor3 = antiOn and Color3.fromRGB(120,120,120) or Color3.fromRGB(40,0,0)
-end)
+	else
+		BoostButton.Text = "BOOST"
+		BoostButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
 
-RunService.Heartbeat:Connect(function()
-	if antiOn then
-		local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
-		if hum and hum:GetState() == Enum.HumanoidStateType.Ragdoll then
-			hum:ChangeState(Enum.HumanoidStateType.Running)
+		if speedConnection then
+			speedConnection:Disconnect()
+			speedConnection = nil
 		end
 	end
 end)
