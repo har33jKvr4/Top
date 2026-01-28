@@ -1,7 +1,8 @@
 --[[ 
 ====================================================
- Speed Boost | Harold lua
- Tsunami UI + LKZ Speed
+ TSUNAMI SCRIPTS | HAROLD
+ GOD MODE HUB + LOADING SCREEN
+ LocalScript
 ====================================================
 ]]
 
@@ -9,26 +10,12 @@
 -- SERVICIOS
 -------------------------------------------------
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
-
--------------------------------------------------
--- CHARACTER
--------------------------------------------------
-local character, hrp, hum
-
-local function setupCharacter(char)
-	character = char
-	hrp = char:WaitForChild("HumanoidRootPart")
-	hum = char:WaitForChild("Humanoid")
-end
-
-if player.Character then setupCharacter(player.Character) end
-player.CharacterAdded:Connect(setupCharacter)
 
 -------------------------------------------------
 -- LOADING SCREEN
@@ -48,8 +35,8 @@ local Title = Instance.new("TextLabel", Background)
 Title.Size = UDim2.new(1,0,0,60)
 Title.Position = UDim2.new(0,0,0.4,0)
 Title.BackgroundTransparency = 1
-Title.Text = "Loading Speed Boost..."
-Title.TextColor3 = Color3.fromRGB(255,0,0)
+Title.Text = "Loading Tsunami Script..."
+Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 32
 Title.TextTransparency = 1
@@ -60,40 +47,73 @@ BarBack.Position = UDim2.new(0.3,0,0.52,0)
 BarBack.BackgroundColor3 = Color3.fromRGB(40,40,40)
 BarBack.BackgroundTransparency = 1
 BarBack.BorderSizePixel = 0
-Instance.new("UICorner", BarBack)
+Instance.new("UICorner", BarBack).CornerRadius = UDim.new(0,10)
 
 local Bar = Instance.new("Frame", BarBack)
 Bar.Size = UDim2.new(0,0,1,0)
-Bar.BackgroundColor3 = Color3.fromRGB(255,0,0)
+Bar.BackgroundColor3 = Color3.fromRGB(0,255,0)
 Bar.BorderSizePixel = 0
-Instance.new("UICorner", Bar)
+Instance.new("UICorner", Bar).CornerRadius = UDim.new(0,10)
 
-TweenService:Create(Background,TweenInfo.new(0.6),{BackgroundTransparency=0}):Play()
-TweenService:Create(Title,TweenInfo.new(0.6),{TextTransparency=0}):Play()
-TweenService:Create(BarBack,TweenInfo.new(0.6),{BackgroundTransparency=0}):Play()
+local Avatar = Instance.new("ImageLabel", Background)
+Avatar.Size = UDim2.new(0,80,0,80)
+Avatar.Position = UDim2.new(0.5,-40,0.65,0)
+Avatar.BackgroundTransparency = 1
+Avatar.ImageTransparency = 1
+
+local avatarUrl = Players:GetUserThumbnailAsync(
+	player.UserId,
+	Enum.ThumbnailType.HeadShot,
+	Enum.ThumbnailSize.Size420x420
+)
+Avatar.Image = avatarUrl
+
+TweenService:Create(Background, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+TweenService:Create(Title, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
+TweenService:Create(BarBack, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+TweenService:Create(Avatar, TweenInfo.new(0.6), {ImageTransparency = 0}):Play()
 
 task.wait(0.6)
 
-TweenService:Create(Bar,TweenInfo.new(1.2),{Size=UDim2.new(1,0,1,0)}):Play()
-task.wait(1.5)
+local barTween = TweenService:Create(
+	Bar,
+	TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	{Size = UDim2.new(1,0,1,0)}
+)
+barTween:Play()
+barTween.Completed:Wait()
 
+task.wait(0.3)
+
+TweenService:Create(Background, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+TweenService:Create(Title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+TweenService:Create(BarBack, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+TweenService:Create(Avatar, TweenInfo.new(0.6), {ImageTransparency = 1}):Play()
+
+task.wait(0.7)
 LoadingGui:Destroy()
+
+-------------------------------------------------
+-- VARIABLES
+-------------------------------------------------
+local godModeEnabled = false
+local humanoid
+local healthConnection
 
 -------------------------------------------------
 -- UI HUB
 -------------------------------------------------
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SpeedBoostHub"
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "TsunamiHub"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0,260,0,150)
-MainFrame.Position = UDim2.new(0.5,-130,0.5,-75)
+MainFrame.Size = UDim2.new(0, 260, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -130, 0.5, -75)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
 MainFrame.BackgroundTransparency = 0.3
 MainFrame.BorderSizePixel = 2
-MainFrame.BorderColor3 = Color3.fromRGB(255,0,0)
+MainFrame.BorderColor3 = Color3.fromRGB(255,255,255)
 MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,12)
@@ -102,25 +122,22 @@ local CreatorLabel = Instance.new("TextLabel", MainFrame)
 CreatorLabel.Size = UDim2.new(1,0,0,25)
 CreatorLabel.Position = UDim2.new(0,0,0,5)
 CreatorLabel.BackgroundTransparency = 1
-CreatorLabel.Text = "Speed Boost | Harold lua"
-CreatorLabel.TextColor3 = Color3.fromRGB(255,0,0)
+CreatorLabel.Text = "Tsunami Scripts | Harold"
+CreatorLabel.TextColor3 = Color3.fromRGB(255,255,255)
 CreatorLabel.Font = Enum.Font.GothamBold
 CreatorLabel.TextSize = 14
 
-local BoostButton = Instance.new("TextButton", MainFrame)
-BoostButton.Size = UDim2.new(0.9,0,0,45)
-BoostButton.Position = UDim2.new(0.05,0,0,60)
-BoostButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
-BoostButton.Text = "BOOST"
-BoostButton.TextColor3 = Color3.fromRGB(255,255,255)
-BoostButton.Font = Enum.Font.GothamBold
-BoostButton.TextSize = 18
-BoostButton.BorderSizePixel = 0
-Instance.new("UICorner", BoostButton).CornerRadius = UDim.new(0,10)
+local GodModeButton = Instance.new("TextButton", MainFrame)
+GodModeButton.Size = UDim2.new(0.9,0,0,45)
+GodModeButton.Position = UDim2.new(0.05,0,0,60)
+GodModeButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+GodModeButton.Text = "GOD MODE"
+GodModeButton.TextColor3 = Color3.fromRGB(255,255,255)
+GodModeButton.Font = Enum.Font.GothamBold
+GodModeButton.TextSize = 18
+GodModeButton.BorderSizePixel = 0
+Instance.new("UICorner", GodModeButton).CornerRadius = UDim.new(0,10)
 
--------------------------------------------------
--- DISCORD (SIN CAMBIOS)
--------------------------------------------------
 local DiscordLabel = Instance.new("TextLabel", MainFrame)
 DiscordLabel.Size = UDim2.new(0,55,0,15)
 DiscordLabel.Position = UDim2.new(0.05,0,0,115)
@@ -149,44 +166,83 @@ DiscordLink.MouseButton1Click:Connect(function()
 end)
 
 -------------------------------------------------
--- SPEED BOOST
+-- GOD MODE
 -------------------------------------------------
-local boostEnabled = false
-local speedConnection
 
-local speedNoSteal = 16
-local speedSteal = 50
+local function EnableGodMode()
 
-BoostButton.MouseButton1Click:Connect(function()
-	boostEnabled = not boostEnabled
+	local character = player.Character or player.CharacterAdded:Wait()
+	humanoid = character:WaitForChild("Humanoid")
 
-	if boostEnabled then
-		BoostButton.Text = "ON"
-		BoostButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	godModeEnabled = true
 
-		speedConnection = RunService.Heartbeat:Connect(function()
-			if character and hrp and hum then
-				local dir = hum.MoveDirection
-				if dir.Magnitude > 0 then
-					local steal = hum.WalkSpeed < 25
-					local spd = steal and speedSteal or speedNoSteal
+	humanoid.MaxHealth = math.huge
+	humanoid.Health = math.huge
 
-					hrp.AssemblyLinearVelocity = Vector3.new(
-						dir.X * spd,
-						hrp.AssemblyLinearVelocity.Y,
-						dir.Z * spd
-					)
-				end
-			end
-		end)
+	if healthConnection then
+		healthConnection:Disconnect()
+	end
 
-	else
-		BoostButton.Text = "BOOST"
-		BoostButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
-
-		if speedConnection then
-			speedConnection:Disconnect()
-			speedConnection = nil
+	healthConnection = humanoid.HealthChanged:Connect(function()
+		if godModeEnabled then
+			humanoid.Health = humanoid.MaxHealth
 		end
+	end)
+
+	local packages = ReplicatedStorage:FindFirstChild("Packages")
+	if packages then
+		local net = packages:FindFirstChild("Net")
+		if net then
+			local kill = net:FindFirstChild("RE/TsunamiEventService/Kill")
+			if kill then
+				kill:Destroy()
+			end
+		end
+	end
+
+	for _, part in pairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanTouch = false
+		end
+	end
+end
+
+local function DisableGodMode()
+
+	godModeEnabled = false
+
+	if healthConnection then
+		healthConnection:Disconnect()
+		healthConnection = nil
+	end
+
+	if humanoid then
+		humanoid.MaxHealth = 100
+		humanoid.Health = 100
+	end
+
+	local character = player.Character
+	if character then
+		for _, part in pairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanTouch = true
+			end
+		end
+	end
+end
+
+GodModeButton.MouseButton1Click:Connect(function()
+	godModeEnabled = not godModeEnabled
+
+	if godModeEnabled then
+		GodModeButton.Text = "ON"
+		GodModeButton.TextColor3 = Color3.fromRGB(0,255,0)
+		GodModeButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+		EnableGodMode()
+	else
+		GodModeButton.Text = "GOD MODE"
+		GodModeButton.TextColor3 = Color3.fromRGB(255,255,255)
+		GodModeButton.BackgroundColor3 = Color3.fromRGB(200,0,0)
+		DisableGodMode()
 	end
 end)
