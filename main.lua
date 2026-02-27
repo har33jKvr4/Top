@@ -5,12 +5,12 @@
 --============================================================
 
 local whitelist = {
-    "Zxyplo213",
+    "HaroldEs08",
     "poulet123445",
     "Mongralcba321",
     "RANE1167840",
     "Alessandro_The8svc",
-    "soul_reaper0746",
+    "soul_reaper0746"
 }
 
 local function isWhitelisted(name)
@@ -164,7 +164,6 @@ end
 
 local function TrackServer(hrp)
     serverPosition = hrp.Position
-
     positionConn = hrp:GetPropertyChangedSignal("Position"):Connect(function()
         task.wait(0.15)
         if hrp then
@@ -178,10 +177,8 @@ end
 
 local function SetServerESP()
     ClearESP()
-
     ESPFolder = Instance.new("Folder", Workspace)
     ESPFolder.Name = "DesyncESP"
-
     ServerESP = CreateESPPart("SERVER POSITION", Color3.fromRGB(0,200,255))
 
     local char = LocalPlayer.Character
@@ -255,41 +252,3 @@ status.Font = Enum.Font.GothamMedium
 status.TextSize = 14
 status.TextColor3 = Color3.fromRGB(0,200,255)
 status.TextXAlignment = Enum.TextXAlignment.Center
-
---============================================================
--- BUTTONS
---============================================================
-
-local setBtn = Instance.new("TextButton", frame)
-setBtn.Size = UDim2.new(1,-24,0,38)
-setBtn.Position = UDim2.fromOffset(12,80)
-setBtn.BackgroundColor3 = Color3.fromRGB(0,200,255)
-setBtn.Text = "SET POSITION"
-setBtn.Font = Enum.Font.GothamBold
-setBtn.TextSize = 16
-setBtn.TextColor3 = Color3.fromRGB(10,20,25)
-Instance.new("UICorner", setBtn).CornerRadius = UDim.new(0,8)
-
-local desyncBtn = Instance.new("TextButton", frame)
-desyncBtn.Size = UDim2.new(1,-24,0,38)
-desyncBtn.Position = UDim2.fromOffset(12,126)
-desyncBtn.BackgroundColor3 = Color3.fromRGB(0,200,255)
-desyncBtn.Text = "ENABLE DESYNC"
-desyncBtn.Font = Enum.Font.GothamBold
-desyncBtn.TextSize = 16
-desyncBtn.TextColor3 = Color3.fromRGB(10,20,25)
-Instance.new("UICorner", desyncBtn).CornerRadius = UDim.new(0,8)
-
---============================================================
--- DISCORD LABEL
---============================================================
-
-local discord = Instance.new("TextLabel", frame)
-discord.Size = UDim2.new(1,0,0,16)
-discord.Position = UDim2.fromOffset(0,186)
-discord.BackgroundTransparency = 1
-discord.Text = "discord.gg/UMmhuXFcmq"
-discord.Font = Enum.Font.GothamMedium
-discord.TextSize = 11
-discord.TextColor3 = Color3.fromRGB(0,200,255)
-discord.TextXAlignment = Enum.TextXAlignment.Center
