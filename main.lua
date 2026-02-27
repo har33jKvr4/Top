@@ -92,7 +92,7 @@ local gui = Instance.new("ScreenGui", guiParent)
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,200,0,120)
+frame.Size = UDim2.new(0,200,0,130)
 frame.Position = UDim2.new(.5,-100,.4,0)
 frame.BackgroundTransparency = .35
 frame.BackgroundColor3 = Color3.new(1,1,1)
@@ -117,19 +117,21 @@ minimize.TextScaled = true
 minimize.BackgroundTransparency = 1
 minimize.TextColor3 = Color3.new(1,1,1)
 
-local saveBtn = Instance.new("TextButton", frame)
-saveBtn.Size = UDim2.new(.9,0,0,35)
-saveBtn.Position = UDim2.new(.05,0,.35,0)
-saveBtn.Text = "SAVE POS"
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.TextScaled = true
-
+-- BOTON TP
 local tpBtn = Instance.new("TextButton", frame)
 tpBtn.Size = UDim2.new(.9,0,0,35)
-tpBtn.Position = UDim2.new(.05,0,.7,-35)
+tpBtn.Position = UDim2.new(0.05,0,0,35)
 tpBtn.Text = "TP OFF"
 tpBtn.Font = Enum.Font.GothamBold
 tpBtn.TextScaled = true
+
+-- BOTON SAVE
+local saveBtn = Instance.new("TextButton", frame)
+saveBtn.Size = UDim2.new(.9,0,0,35)
+saveBtn.Position = UDim2.new(0.05,0,0,80)
+saveBtn.Text = "SAVE POS"
+saveBtn.Font = Enum.Font.GothamBold
+saveBtn.TextScaled = true
 
 for _,b in pairs({saveBtn,tpBtn}) do
     b.BackgroundTransparency=.3
@@ -150,7 +152,7 @@ minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
     saveBtn.Visible = not minimized
     tpBtn.Visible = not minimized
-    frame.Size = minimized and UDim2.new(0,200,0,25) or UDim2.new(0,200,0,120)
+    frame.Size = minimized and UDim2.new(0,200,0,25) or UDim2.new(0,200,0,130)
 end)
 
 --// SAVE POS
@@ -216,6 +218,12 @@ end
 --// TOGGLE
 tpBtn.MouseButton1Click:Connect(function()
     ENABLED = not ENABLED
-    tpBtn.Text = ENABLED and "TP ON" or "TP OFF"
-    if ENABLED then enableDetect() else disableDetect() end
+    
+    if ENABLED then
+        tpBtn.Text = "TP ON"
+        enableDetect()
+    else
+        tpBtn.Text = "TP OFF"
+        disableDetect()
+    end
 end)
